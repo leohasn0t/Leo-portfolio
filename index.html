@@ -34,7 +34,7 @@
 @media (max-width:640px){ :root{ --frame: 12px; } }
 
 *{ box-sizing:border-box; margin:0; padding:0; }
-html{ scroll-behavior:smooth; }
+html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; text-size-adjust:100%; }
 @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
 
 body{
@@ -109,8 +109,9 @@ main{
   padding-top:8vh; position:relative;
 }
 .eyebrow{
-  font-family:var(--mono); font-size:12px; letter-spacing:.22em;
+  font-family:var(--mono); font-size:12px; letter-spacing:.16em;
   text-transform:uppercase; color:var(--char-soft); margin-bottom:14px;
+  max-width:100%; text-wrap:balance;
 }
 .eyebrow b{ color:var(--kerf); font-weight:600; }
 .hero h1{
@@ -419,14 +420,22 @@ footer{ padding:10vh 0 calc(var(--frame) + 20px); }
 }
 #bow-hud .gauge b{ color:var(--kerf); }
 #arrow-fly{
-  position:fixed; z-index:71; left:-80px; width:70px; pointer-events:none;
+  position:fixed; z-index:71; right:40px; left:auto; width:70px; pointer-events:none;
   opacity:0;
 }
 @keyframes fly{
   0%{ transform:translateX(0); opacity:1; }
-  100%{ transform:translateX(115vw); opacity:1; }
+  100%{ transform:translateX(-118vw); opacity:1; }
 }
 @media (max-width:640px){ #bow-hud{ width:66px; } }
+.dim .label .short{ display:none; }
+@media (max-width:700px){
+  .dim .label .long{ display:none; }
+  .dim .label .short{ display:inline; }
+  .dim .label{ font-size:10px; letter-spacing:.04em; }
+}
+/* safety net: nothing may create sideways scroll or poke past the sheet frame */
+body{ overflow-x:clip; }
 @media (prefers-reduced-motion: reduce){
   .dim .line{ transform:scaleX(1); transition:none; }
   .dim .label{ opacity:1; transition:none; }
@@ -470,7 +479,7 @@ footer{ padding:10vh 0 calc(var(--frame) + 20px); }
         <span class="ext-l"></span><span class="ext-r"></span>
         <span class="line"></span>
         <span class="arrow l"></span><span class="arrow r"></span>
-        <span class="label">MECHANICAL ENGINEERING · CLASS OF 2029</span>
+        <span class="label"><span class="long">MECHANICAL ENGINEERING · CLASS OF 2029</span><span class="short">MECH E · CLASS OF 2029</span></span>
       </div>
       <h1>Leo<br>Tokumi</h1>
     </div>
@@ -760,7 +769,7 @@ footer{ padding:10vh 0 calc(var(--frame) + 20px); }
       <div class="tb-cell"><span class="k">Location</span><span class="v">HONOLULU, HI</span></div>
       <div class="tb-cell"><span class="k">Material</span><span class="v">BALTIC BIRCH</span></div>
       <div class="tb-cell tb-foot">
-        <span class="v" style="font-size:11px;">© 2026 LEO TOKUMI — ENGINEERING PORTFOLIO · BUILT 2026</span>
+        <span class="v" style="font-size:11px;">© 2026 LEO TOKUMI — ENGINEERING PORTFOLIO · BUILT &amp; DESIGNED WITH CLAUDE 2026</span>
         <span class="v" style="font-size:11px;">SHEET 1 OF 1</span>
       </div>
     </div>
@@ -770,11 +779,11 @@ footer{ padding:10vh 0 calc(var(--frame) + 20px); }
 <!-- ============ SIGNATURE: scroll-drawn bow ============ -->
 <div id="bow-hud" aria-hidden="true">
   <svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
-    <path d="M 78 4 Q 96 30 78 56" fill="none" stroke="#D9E8F5" stroke-width="4" stroke-linecap="round"/>
-    <polyline id="bow-string" points="78,4 74,30 78,56" fill="none" stroke="#E2574C" stroke-width="1.6"/>
+    <path d="M 82 4 Q 62 30 82 56" fill="none" stroke="#D9E8F5" stroke-width="4" stroke-linecap="round"/>
+    <polyline id="bow-string" points="82,4 82,30 82,56" fill="none" stroke="#E2574C" stroke-width="1.6"/>
     <g id="bow-arrow">
-      <line x1="74" y1="30" x2="18" y2="30" stroke="#E8A13C" stroke-width="2.5"/>
-      <path d="M 18 30 l 9 -4 v 8 z" fill="#E8A13C"/>
+      <line x1="82" y1="30" x2="20" y2="30" stroke="#E8A13C" stroke-width="2.5"/>
+      <path d="M 20 30 l 9 -4 v 8 z" fill="#E8A13C"/>
     </g>
   </svg>
   <div class="gauge">DRAW <b id="draw-pct">0%</b></div>
@@ -801,15 +810,15 @@ footer{ padding:10vh 0 calc(var(--frame) + 20px); }
   function onScroll(){
     var max = document.documentElement.scrollHeight - window.innerHeight;
     var p = max > 0 ? Math.min(1, window.scrollY / max) : 0;
-    var pull = 74 - p * 46;
-    string.setAttribute('points', '78,4 ' + pull + ',30 78,56');
-    nocked.setAttribute('transform', 'translate(' + (pull - 74) + ',0)');
+    var pull = 82 + p * 14;           /* string drawn back toward the archer (right) */
+    string.setAttribute('points', '82,4 ' + pull + ',30 82,56');
+    nocked.setAttribute('transform', 'translate(' + (pull - 82) + ',0)');
     pctEl.textContent = Math.round(p * 100) + '%';
 
     if (p >= 0.985 && !fired && !reduce){
       fired = true;
       nocked.style.visibility = 'hidden';
-      fly.style.top = (window.innerHeight * 0.4) + 'px';
+      fly.style.top = (window.innerHeight - 62) + 'px';
       fly.style.opacity = '1';
       fly.style.animation = 'fly 0.9s cubic-bezier(.2,0,.4,1) forwards';
       setTimeout(function(){
